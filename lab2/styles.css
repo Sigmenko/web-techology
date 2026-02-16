@@ -1,13 +1,13 @@
-/* 1. Скидаємо стандартні відступи та задаємо шрифт */
+/* --- 1. ЗАГАЛЬНІ СТИЛІ --- */
 body {
-    font-family: 'Montserrat', sans-serif; /* Сучасний шрифт */
+    font-family: 'Montserrat', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f7f6; /* Приємний світло-сірий фон */
+    background-color: #f4f7f6;
     color: #333;
 }
 
-/* 2. Шапка (Header) */
+/* --- 2. ШАПКА (HEADER) --- */
 header {
     background-color: #ff6347; /* Томатний колір */
     color: white;
@@ -15,14 +15,18 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Тінь під шапкою */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky; /* Липка шапка */
+    top: 0;
+    z-index: 1000;
 }
 
 header h1 {
     margin: 0;
+    font-size: 1.8rem;
 }
 
-/* 3. Навігація */
+/* --- 3. НАВІГАЦІЯ --- */
 nav ul {
     list-style: none;
     display: flex;
@@ -39,15 +43,16 @@ nav a {
     transition: color 0.3s;
 }
 
-nav a:hover {
-    color: #ffd700; /* Золотий при наведенні */
+nav a:hover, nav a.active {
+    color: #ffd700; /* Золотий колір при наведенні */
 }
 
-/* 4. Основний контент */
+/* --- 4. ОСНОВНИЙ КОНТЕНТ --- */
 main {
     padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
+    min-height: 80vh; /* Щоб футер був знизу */
 }
 
 h2 {
@@ -55,38 +60,38 @@ h2 {
     display: inline-block;
     padding-bottom: 10px;
     margin-bottom: 30px;
+    color: #2c3e50;
 }
 
-/* --- GRID СІТКА --- */
+/* --- 5. СІТКА ТОВАРІВ (GRID) --- */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* 3 колонки */
-    gap: 30px; /* Відступи */
+    gap: 30px;
 }
 
-/* 5. Картка товару (Новий дизайн) */
+/* --- 6. КАРТКА ТОВАРУ --- */
 .food-card {
     background: white;
-    border-radius: 15px; /* Круглі кути */
-    overflow: hidden; /* Обрізає все, що вилазить */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05); /* М'яка тінь */
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
 }
 
 .food-card:hover {
-    transform: translateY(-5px); /* Ефект підйому */
+    transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.15);
 }
 
 .food-card img {
     width: 100%;
-    height: 200px; /* Фіксована висота */
-    object-fit: cover; /* Гарне обрізання фото */
+    height: 200px;
+    object-fit: cover;
 }
 
-/* Вміст картки */
 .card-content {
     padding: 20px;
     display: flex;
@@ -94,9 +99,18 @@ h2 {
     flex-grow: 1;
 }
 
+/* Верхній рядок картки (Назва + Сердечко) */
+.card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
 .food-card h3 {
-    margin: 0 0 10px 0;
+    margin: 0;
     font-size: 1.2rem;
+    color: #2c3e50;
 }
 
 .food-card p {
@@ -107,7 +121,6 @@ h2 {
     flex-grow: 1;
 }
 
-/* Низ картки */
 .card-bottom {
     display: flex;
     justify-content: space-between;
@@ -121,13 +134,13 @@ h2 {
     font-weight: bold;
 }
 
-/* Кнопка */
+/* --- 7. КНОПКИ --- */
 button {
     background-color: #ff6347;
     color: white;
     border: none;
     padding: 10px 20px;
-    border-radius: 25px; /* Кнопка-пігулка */
+    border-radius: 25px;
     font-weight: bold;
     font-family: inherit;
     cursor: pointer;
@@ -136,20 +149,66 @@ button {
 
 button:hover {
     background-color: #e5533d;
-    transform: scale(1.05); /* Легке збільшення */
+    transform: scale(1.05);
 }
 
-/* 6. Футер */
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- 8. СТИЛІ ДЛЯ СЕРДЕЧКА (ЛАБА 2) --- */
+.favorite-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #ccc; /* Сірий (не активний) */
+    padding: 0;
+    line-height: 1;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.favorite-btn:hover {
+    transform: scale(1.2);
+    background: none; /* Щоб не було фону при наведенні */
+}
+
+.favorite-btn.active {
+    color: #e74c3c; /* Червоний (активний) */
+}
+
+/* --- 9. СТИЛІ ДЛЯ ТАЙМЕРА (ЛАБА 2) --- */
+#delivery-timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #e67e22;
+    margin-top: 15px;
+    text-align: center;
+    padding: 15px;
+    border: 2px dashed #e67e22;
+    border-radius: 10px;
+    background-color: #fff8e1;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* --- 10. ФУТЕР --- */
 footer {
     text-align: center;
     padding: 40px 20px;
     background-color: #333;
     color: #aaa;
-    margin-top: 60px;
-    font-size: 0.9rem;
+    margin-top: auto;
 }
 
-/* --- АДАПТИВНІСТЬ --- */
+/* --- 11. АДАПТИВНІСТЬ (Мобільні пристрої) --- */
 @media (max-width: 768px) {
     .grid-container {
         grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшеті */
@@ -163,12 +222,13 @@ footer {
 
     header {
         flex-direction: column;
-        text-align: center;
         gap: 15px;
+        text-align: center;
     }
 
     nav ul {
-        flex-direction: column;
-        gap: 10px;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }

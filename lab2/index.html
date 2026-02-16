@@ -3,18 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Доставка їжі - FoodExpress (Lab 2)</title>
+    <title>Доставка їжі - FoodExpress</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        /* СТИЛІ */
+        body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; }
+        header { background-color: #ff6347; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; color: white; }
+        
+        nav ul { list-style: none; display: flex; gap: 20px; margin: 0; padding: 0; }
+        nav a { color: white; text-decoration: none; font-weight: bold; font-size: 1.1rem; }
+        nav a:hover { color: #ffd700; }
+        
+        main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        section { margin-bottom: 40px; }
+        h2 { border-bottom: 2px solid #ff6347; display: inline-block; padding-bottom: 5px; }
+
+        /* СІТКА */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        
+        /* КАРТКА */
+        .food-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; }
+        .food-card:hover { transform: translateY(-5px); }
+        .food-card img { width: 100%; height: 200px; object-fit: cover; }
+        
+        .card-content { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .food-card h3 { margin: 0; font-size: 1.2rem; }
+        
+        /* СЕРДЕЧКО */
+        .favorite-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #ccc; transition: transform 0.2s; }
+        .favorite-btn:hover { transform: scale(1.2); }
+        .favorite-btn.active { color: #e74c3c; } /* Червоний коли активний */
+
+        .card-bottom { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+        .price { font-weight: bold; font-size: 1.2rem; }
+        
+        button { background-color: #ff6347; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #e5533d; }
+        
+        /* ТАЙМЕР */
+        #delivery-timer { margin-top: 15px; padding: 10px; background: #fff8e1; border: 2px dashed #e67e22; border-radius: 10px; text-align: center; font-weight: bold; color: #e67e22; }
+    </style>
 </head>
 <body>
     <header>
         <h1>FoodExpress</h1>
         <nav>
             <ul>
-                <li><a href="#menu">Меню</a></li>
+                <li><a href="index.html">Меню</a></li>
+                <li><a href="favorites.html">Улюблені ❤️</a></li>
                 <li><a href="#cart">Кошик</a></li>
-                <li><a href="#orders">Мої замовлення</a></li>
+                <li><a href="#orders">Історія</a></li>
             </ul>
         </nav>
     </header>
@@ -22,8 +63,7 @@
     <main>
         <section id="menu">
             <h2>Наше Меню</h2>
-            <div class="grid-container" id="menu-container">
-                </div>
+            <div class="grid-container" id="menu-container"></div>
         </section>
 
         <hr>
@@ -33,28 +73,192 @@
             <div class="grid-container" id="cart-container">
                 <p>Кошик порожній</p>
             </div>
-            
             <p style="text-align:right; font-size:1.5em; font-weight:bold; margin-top: 20px;">
                 Разом: <span id="total-price">0</span> грн
             </p>
-            
-            <div id="timer-container"></div>
         </section>
 
         <hr>
 
         <section id="orders">
             <h2>Історія замовлень</h2>
-            <div class="grid-container" id="orders-container">
-                </div>
+            <div class="grid-container" id="orders-container"></div>
         </section>
     </main>
 
     <footer>
-        <p>Контакти: +380 99 999 99 99 | support@foodexpress.com</p>
-        <p>&copy; 2026 Всі права захищені</p>
+        <p style="text-align: center; color: #777;">&copy; 2026 FoodExpress</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        // --- 1. ДАНІ (З ЛОКАЛЬНИМИ КАРТИНКАМИ) ---
+        const menuItems = [
+            { 
+                id: 1, 
+                title: "Піца Маргарита", 
+                price: 250, 
+                image: "img/pizza.jpg", 
+                description: "Класика: томати, моцарела." 
+            },
+            { 
+                id: 2, 
+                title: "Сет 'Каліфорнія'", 
+                price: 400, 
+                image: "img/sushi.jpg", 
+                description: "Лосось, авокадо, огірок." 
+            },
+            { 
+                id: 3, 
+                title: "Бургер 'BBQ'", 
+                price: 180, 
+                image: "img/burger.jpg", 
+                description: "Яловичина, бекон, цибуля." 
+            },
+            { 
+                id: 4, 
+                title: "Салат Цезар", 
+                price: 150, 
+                image: "img/salad.jpg", 
+                description: "Курка, пармезан, сухарі." 
+            }
+        ];
+
+        // --- 2. ЗМІННІ ---
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let cart = [];
+        const ordersHistory = [
+            { id: 1234, date: "10.02.2026", items: "Піца Маргарита", total: 300, status: "Виконано" }
+        ];
+
+        // --- 3. ЗАПУСК ---
+        const menuContainer = document.getElementById('menu-container');
+        const cartContainer = document.getElementById('cart-container');
+        const ordersContainer = document.getElementById('orders-container');
+
+        renderMenu();
+        renderCart();
+        renderHistory();
+
+        // --- 4. ФУНКЦІЇ ---
+        function renderMenu() {
+            menuContainer.innerHTML = '';
+            menuItems.forEach(dish => {
+                const isLiked = favorites.map(Number).includes(Number(dish.id));
+                const activeClass = isLiked ? 'active' : ''; // Червоне чи ні
+
+                const card = document.createElement('article');
+                card.className = 'food-card';
+                card.innerHTML = `
+                    <img src="${dish.image}" alt="${dish.title}">
+                    <div class="card-content">
+                        <div class="card-top-row">
+                            <h3>${dish.title}</h3>
+                            <button class="favorite-btn ${activeClass}" onclick="toggleFavorite(${dish.id}, this)">❤</button>
+                        </div>
+                        <p>${dish.description}</p>
+                        <div class="card-bottom">
+                            <span class="price">${dish.price} грн</span>
+                            <button onclick="addToCart(${dish.id}, this)">В кошик</button>
+                        </div>
+                    </div>
+                `;
+                menuContainer.appendChild(card);
+            });
+        }
+
+        function toggleFavorite(id, btn) {
+            id = Number(id);
+            let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+            favs = favs.map(Number);
+
+            if (favs.includes(id)) {
+                favs = favs.filter(f => f !== id);
+                btn.classList.remove('active');
+            } else {
+                favs.push(id);
+                btn.classList.add('active');
+            }
+            localStorage.setItem('favorites', JSON.stringify(favs));
+            favorites = favs;
+        }
+
+        function addToCart(id, btn) {
+            const item = menuItems.find(i => i.id === id);
+            cart.push(item);
+            renderCart();
+            
+            // Ефект кнопки
+            const oldText = btn.innerText;
+            btn.innerText = "Ок!";
+            btn.style.background = "#2ecc71";
+            setTimeout(() => { btn.innerText = oldText; btn.style.background = ""; }, 500);
+        }
+
+        function renderCart() {
+            cartContainer.innerHTML = '';
+            let total = 0;
+            if (cart.length === 0) {
+                cartContainer.innerHTML = '<p>Кошик порожній</p>';
+                document.getElementById('total-price').innerText = '0';
+                if(document.getElementById('checkout-btn')) document.getElementById('checkout-btn').remove();
+                return;
+            }
+            cart.forEach(item => {
+                total += item.price;
+                const div = document.createElement('div');
+                div.innerHTML = `<b>${item.title}</b> - ${item.price} грн`;
+                div.style.borderBottom = "1px solid #eee"; div.style.padding = "5px";
+                cartContainer.appendChild(div);
+            });
+            document.getElementById('total-price').innerText = total;
+
+            if (!document.getElementById('checkout-btn')) {
+                const btn = document.createElement('button');
+                btn.id = 'checkout-btn';
+                btn.innerText = "Оформити замовлення";
+                btn.style.width = "100%"; btn.style.marginTop = "15px";
+                btn.onclick = startTimer;
+                document.getElementById('cart').appendChild(btn);
+            }
+        }
+
+        function renderHistory() {
+            ordersContainer.innerHTML = '';
+            ordersHistory.forEach(order => {
+                const div = document.createElement('div');
+                div.className = 'food-card';
+                div.style.padding = "15px";
+                div.innerHTML = `<b>Замовлення #${order.id}</b><br>${order.items || order.title}<br><b>${order.total} грн</b>`;
+                ordersContainer.appendChild(div);
+            });
+        }
+
+        function startTimer() {
+            const timerDiv = document.createElement('div');
+            timerDiv.id = 'delivery-timer';
+            document.getElementById('cart').appendChild(timerDiv);
+            document.getElementById('checkout-btn').disabled = true;
+            
+            let time = 5;
+            const interval = setInterval(() => {
+                timerDiv.innerText = `Доставка через: ${time} с`;
+                time--;
+                if (time < 0) {
+                    clearInterval(interval);
+                    timerDiv.innerText = "Замовлення доставлено! ✅";
+                    
+                    ordersHistory.unshift({
+                        id: Math.floor(Math.random()*1000),
+                        items: cart.map(i=>i.title).join(", "),
+                        total: document.getElementById('total-price').innerText,
+                        status: "Нове"
+                    });
+                    renderHistory();
+                    cart = []; renderCart();
+                    setTimeout(() => timerDiv.remove(), 3000);
+                }
+            }, 1000);
+        }
+    </script>
 </body>
 </html>
