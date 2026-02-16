@@ -1,4 +1,3 @@
-// --- 1. БАЗА ДАНИХ (МЕНЮ) ---
 const menuItems = [
     {
         id: 1,
@@ -30,8 +29,7 @@ const menuItems = [
     }
 ];
 
-// --- 2. ДАНІ (КОШИК ТА ІСТОРІЯ) ---
-let cart = []; // Порожній кошик
+let cart = []; 
 
 const ordersHistory = [
     { id: 1234, date: "10.02.2026", items: "Піца Маргарита", total: 300, status: "Виконано" },
@@ -63,7 +61,6 @@ for (let i = 0; i < menuItems.length; i++) {
     menuContainer.appendChild(card);
 }
 
-// --- 4. ГЕНЕРАЦІЯ ІСТОРІЇ (ЦИКЛ WHILE) ---
 const ordersContainer = document.getElementById('orders-container');
 let j = 0;
 
@@ -89,42 +86,33 @@ while (j < ordersHistory.length) {
     j++;
 }
 
-// --- 5. ЛОГІКА ДОДАВАННЯ В КОШИК ---
 function addToCart(id, btnElement) {
-    // Знаходимо товар в базі
     const item = menuItems.find(product => product.id === id);
     
-    // Додаємо в масив кошика
     cart.push(item);
     
-    // Оновлюємо вигляд кошика
     renderCart();
     
-    // --- ЕФЕКТ КНОПКИ (Вимога варіанту) ---
     const originalText = btnElement.innerText;
-    btnElement.style.backgroundColor = "#2ecc71"; // Зелений
+    btnElement.style.backgroundColor = "#2ecc71";
     btnElement.innerText = "Додано!";
     
     setTimeout(() => {
-        btnElement.style.backgroundColor = ""; // Повертаємо як було
+        btnElement.style.backgroundColor = ""; 
         btnElement.innerText = originalText;
     }, 1000);
 }
 
-// --- 6. ЛОГІКА КОШИКА (ПОВНІСТЮ ПЕРЕРОБЛЕНА) ---
 function renderCart() {
     const cartContainer = document.getElementById('cart-container');
     const totalPriceElement = document.getElementById('total-price');
-    
-    // Очищаємо контейнер перед оновленням
-    cartContainer.innerHTML = '';
+        cartContainer.innerHTML = '';
     
     let total = 0;
 
     if (cart.length === 0) {
         cartContainer.innerHTML = '<p style="text-align:center; color:#777;">Кошик порожній</p>';
         totalPriceElement.innerText = '0';
-        // Видаляємо кнопку замовлення, якщо вона була
         const existingBtn = document.getElementById('checkout-btn');
         if (existingBtn) existingBtn.remove();
         return;
@@ -135,10 +123,8 @@ function renderCart() {
         const item = cart[i];
         total += item.price;
         
-        // Створюємо простий рядок для товару (БЕЗ зайвих кнопок)
         const cartItem = document.createElement('div');
         
-        // Додаємо трохи стилів прямо тут для краси списку
         cartItem.style.display = 'flex';
         cartItem.style.justifyContent = 'space-between';
         cartItem.style.padding = '10px';
@@ -156,7 +142,6 @@ function renderCart() {
     // Оновлюємо загальну суму
     totalPriceElement.innerText = total;
     
-    // Перевіряємо, чи є кнопка "Оформити", якщо ні - створюємо
     if (!document.getElementById('checkout-btn')) {
         const checkoutBtn = document.createElement('button');
         checkoutBtn.id = 'checkout-btn';
@@ -165,14 +150,12 @@ function renderCart() {
         checkoutBtn.style.width = "100%";
         checkoutBtn.style.padding = "15px";
         checkoutBtn.style.fontSize = "1.1em";
-        checkoutBtn.onclick = startTimer; // Прив'язуємо таймер
+        checkoutBtn.onclick = startTimer; 
         
-        // Додаємо кнопку в кінець секції кошика
         document.getElementById('cart').appendChild(checkoutBtn);
     }
 }
 
-// --- 7. ТАЙМЕР ДОСТАВКИ (Вимога варіанту) ---
 function startTimer() {
     const cartSection = document.getElementById('cart');
     
@@ -183,7 +166,7 @@ function startTimer() {
         timerDisplay.id = 'delivery-timer';
         timerDisplay.style.fontSize = '1.2em';
         timerDisplay.style.fontWeight = 'bold';
-        timerDisplay.style.color = '#e67e22'; // Помаранчевий
+        timerDisplay.style.color = '#e67e22'; 
         timerDisplay.style.marginTop = '15px';
         timerDisplay.style.textAlign = 'center';
         timerDisplay.style.padding = '10px';
@@ -192,20 +175,18 @@ function startTimer() {
         cartSection.appendChild(timerDisplay);
     }
     
-    let timeLeft = 30; // 30 секунд
+    let timeLeft = 30; 
     
-    // Блокуємо кнопку, щоб не клацали зайвий раз
     const btn = document.getElementById('checkout-btn');
     if(btn) btn.disabled = true;
 
-    // Запускаємо інтервал
     const timerInterval = setInterval(() => {
-        timerDisplay.innerText = `⏳ Очікуйте доставку через: ${timeLeft} сек`;
+        timerDisplay.innerText = `Очікуйте доставку через: ${timeLeft} сек`;
         timeLeft--;
         
         if (timeLeft < 0) {
             clearInterval(timerInterval);
-            timerDisplay.innerText = "🚀 Замовлення доставлено! Смачного!";
+            timerDisplay.innerText = " Замовлення доставлено! Смачного!";
             timerDisplay.style.color = "green";
             timerDisplay.style.borderColor = "green";
             
