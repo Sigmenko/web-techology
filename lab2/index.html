@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доставка їжі - FoodExpress (Lab 2)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>FoodExpress</h1>
+        <nav>
+            <ul>
+                <li><a href="#menu">Меню</a></li>
+                <li><a href="#cart">Кошик</a></li>
+                <li><a href="#orders">Мої замовлення</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="menu">
+            <h2>Наше Меню</h2>
+            <div class="grid-container" id="menu-container">
+                </div>
+        </section>
+
+        <hr>
+
+        <section id="cart">
+            <h2>Ваш Кошик</h2>
+            <div class="grid-container" id="cart-container">
+                <p>Кошик порожній</p>
+            </div>
+            
+            <p style="text-align:right; font-size:1.5em; font-weight:bold; margin-top: 20px;">
+                Разом: <span id="total-price">0</span> грн
+            </p>
+            
+            <div id="timer-container"></div>
+        </section>
+
+        <hr>
+
+        <section id="orders">
+            <h2>Історія замовлень</h2>
+            <div class="grid-container" id="orders-container">
+                </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Контакти: +380 99 999 99 99 | support@foodexpress.com</p>
+        <p>&copy; 2026 Всі права захищені</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
