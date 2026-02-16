@@ -90,7 +90,11 @@
         <div class="grid-container">
             <article class="food-card">
                 <h3>Суші сет "Дракон"</h3>
-                <p>1 шт.</p>
+                <div style="display: flex; gap: 10px; align-items: center; justify-content: center; margin: 10px 0;">
+    <button style="padding: 5px 10px; margin: 0; font-size: 1rem;">-</button>
+    <span style="font-weight: bold;">1</span>
+    <button style="padding: 5px 10px; margin: 0; font-size: 1rem;">+</button>
+</div>
                 <span class="price">450 грн</span>
                 <button style="margin-top:10px; padding:5px; background:red; color:white; border:none;">Видалити</button>
             </article>
@@ -100,15 +104,40 @@
 
     <hr>
 
-    <section id="orders">
-        <h2>Історія замовлень</h2>
-        <div style="background: white; padding: 15px; border-radius: 8px;">
-            <p><strong>Замовлення #1234</strong> - <span style="color:green">Виконано</span></p>
-            <p>Піца Маргарита, Кола 0.5л</p>
-        </div>
-    </section>
-    </main>
+<section id="orders">
+            <h2>Історія замовлень</h2>
+            <div class="grid-container">
+                
+                <article class="food-card">
+                    <div class="card-content">
+                        <h3>Замовлення #1234</h3>
+                        <p style="color:green; font-weight:bold; margin-bottom: 5px;">✅ Виконано</p>
+                        <p style="font-size: 0.9em; color: #555;">10.02.2026</p>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                        <p>Піца Маргарита, Кола 0.5л</p>
+                        <div class="card-bottom">
+                            <span class="price">300 грн</span>
+                            <button>Повторити</button>
+                        </div>
+                    </div>
+                </article>
 
+                <article class="food-card">
+                    <div class="card-content">
+                        <h3>Замовлення #1230</h3>
+                        <p style="color:green; font-weight:bold; margin-bottom: 5px;">✅ Виконано</p>
+                        <p style="font-size: 0.9em; color: #555;">05.02.2026</p>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                        <p>Сет "Каліфорнія", Сік</p>
+                        <div class="card-bottom">
+                            <span class="price">460 грн</span>
+                            <button>Повторити</button>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </section>
     <footer>
         <p>Контакти: +380 99 999 99 99 | support@foodexpress.com</p>
         <p>&copy; 2026 Всі права захищені </p>
