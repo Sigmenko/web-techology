@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/web-techology/lab3/build/static/css/main.89153388.css",
+    "main.js": "/web-techology/lab3/build/static/js/main.8f069422.js",
+    "static/js/453.9de7a764.chunk.js": "/web-techology/lab3/build/static/js/453.9de7a764.chunk.js",
+    "index.html": "/web-techology/lab3/build/index.html",
+    "main.89153388.css.map": "/web-techology/lab3/build/static/css/main.89153388.css.map",
+    "main.8f069422.js.map": "/web-techology/lab3/build/static/js/main.8f069422.js.map",
+    "453.9de7a764.chunk.js.map": "/web-techology/lab3/build/static/js/453.9de7a764.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.89153388.css",
+    "static/js/main.8f069422.js"
+  ]
+}
