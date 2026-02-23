@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 
-// --- БАЗА ДАНИХ ---
 const menuData = [
   { id: 1, title: "Піца Маргарита", price: 250, category: "pizza", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=300&q=50" },
   { id: 2, title: "Сет 'Каліфорнія'", price: 400, category: "sushi", image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300&q=50" },
@@ -20,9 +19,8 @@ function DishCard({ dish, addToCart, toggleFavorite, isFavorite }) {
         <button 
           className={`heart-btn ${isFavorite ? 'active' : ''}`} 
           onClick={() => toggleFavorite(dish.id)}
-          title="Додати в улюблені"
         >
-          ❤
+          Улюблене
         </button>
       </div>
       <p style={{ fontWeight: 'bold', fontSize: '1.2rem', margin: '10px 0' }}>{dish.price} грн</p>
@@ -31,18 +29,26 @@ function DishCard({ dish, addToCart, toggleFavorite, isFavorite }) {
   );
 }
 
-// --- КОМПОНЕНТ: Меню ---
 function Menu({ favorites, toggleFavorite, addToCart }) {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [sortOrder, setSortOrder] = useState('default');
 
-  const filteredDishes = activeCategory === 'all' 
-    ? menuData 
+  let displayedDishes = activeCategory === 'all' 
+    ? [...menuData] 
     : menuData.filter(dish => dish.category === activeCategory);
+
+  if (sortOrder === 'asc') {
+    displayedDishes.sort((a, b) => a.price - b.price);
+  } else if (sortOrder === 'desc') {
+    displayedDishes.sort((a, b) => b.price - a.price);
+  }
 
   return (
     <div>
       <h2>Наше Меню</h2>
+      
       <div className="filters">
+        <span style={{ fontWeight: 'bold', marginRight: '10px', alignSelf: 'center' }}>Категорії:</span>
         <button className={activeCategory === 'all' ? 'active' : ''} onClick={() => setActiveCategory('all')}>Всі</button>
         <button className={activeCategory === 'pizza' ? 'active' : ''} onClick={() => setActiveCategory('pizza')}>Піца</button>
         <button className={activeCategory === 'sushi' ? 'active' : ''} onClick={() => setActiveCategory('sushi')}>Суші</button>
@@ -50,8 +56,15 @@ function Menu({ favorites, toggleFavorite, addToCart }) {
         <button className={activeCategory === 'drinks' ? 'active' : ''} onClick={() => setActiveCategory('drinks')}>Напої</button>
       </div>
 
+      <div className="filters" style={{ marginTop: '10px', marginBottom: '30px' }}>
+        <span style={{ fontWeight: 'bold', marginRight: '10px', alignSelf: 'center' }}>Сортування:</span>
+        <button className={sortOrder === 'default' ? 'active' : ''} onClick={() => setSortOrder('default')}>За замовчуванням</button>
+        <button className={sortOrder === 'asc' ? 'active' : ''} onClick={() => setSortOrder('asc')}>Від дешевшого</button>
+        <button className={sortOrder === 'desc' ? 'active' : ''} onClick={() => setSortOrder('desc')}>Від дорожчого</button>
+      </div>
+
       <div className="grid">
-        {filteredDishes.map(dish => (
+        {displayedDishes.map(dish => (
           <DishCard 
             key={dish.id} 
             dish={dish} 
@@ -65,11 +78,10 @@ function Menu({ favorites, toggleFavorite, addToCart }) {
   );
 }
 
-// --- КОМПОНЕНТ: Улюблені ---
 function Favorites({ favorites, toggleFavorite, addToCart }) {
   const favoriteDishes = menuData.filter(dish => favorites.includes(dish.id));
 
-  if (favoriteDishes.length === 0) return <div className="empty-msg">Ви ще не додали жодної страви до улюблених </div>;
+  if (favoriteDishes.length === 0) return <div className="empty-msg">Ви ще не додали жодної страви до улюблених</div>;
 
   return (
     <div>
@@ -89,7 +101,6 @@ function Favorites({ favorites, toggleFavorite, addToCart }) {
   );
 }
 
-// --- КОМПОНЕНТ: Кошик ---
 function Cart({ cart, removeFromCart, clearCart, addOrder }) {
   const [isOrdering, setIsOrdering] = useState(false);
   const total = cart.reduce((sum, item) => sum + item.price, 0);
@@ -102,7 +113,7 @@ function Cart({ cart, removeFromCart, clearCart, addOrder }) {
         date: new Date().toLocaleString(),
         items: cart.map(i => i.title).join(", "),
         total: total,
-        status: "Доставлено "
+        status: "Доставлено"
       };
       addOrder(newOrder); 
       clearCart();        
@@ -111,7 +122,7 @@ function Cart({ cart, removeFromCart, clearCart, addOrder }) {
     }, 3000); 
   };
 
-  if (cart.length === 0) return <div className="empty-msg">Кошик порожній 🛒</div>;
+  if (cart.length === 0) return <div className="empty-msg">Кошик порожній</div>;
 
   return (
     <div>
@@ -122,7 +133,7 @@ function Cart({ cart, removeFromCart, clearCart, addOrder }) {
             <b>{item.title}</b> <br/>
             <span style={{ color: '#555' }}>{item.price} грн</span>
           </div>
-          <button className="remove-btn" onClick={() => removeFromCart(index)} title="Видалити">❌</button>
+          <button className="remove-btn" onClick={() => removeFromCart(index)}>Видалити</button>
         </div>
       ))}
       <h3 style={{ textAlign: 'right', marginTop: '20px' }}>Разом: {total} грн</h3>
@@ -132,15 +143,14 @@ function Cart({ cart, removeFromCart, clearCart, addOrder }) {
         onClick={handleCheckout} 
         disabled={isOrdering}
       >
-        {isOrdering ? " Очікуйте доставку..." : "Оформити замовлення"}
+        {isOrdering ? "Очікуйте доставку..." : "Оформити замовлення"}
       </button>
     </div>
   );
 }
 
-// --- КОМПОНЕНТ: Історія замовлень ---
 function OrderList({ orders }) {
-  if (orders.length === 0) return <div className="empty-msg">Історія порожня </div>;
+  if (orders.length === 0) return <div className="empty-msg">Історія порожня</div>;
 
   return (
     <div>
@@ -157,7 +167,6 @@ function OrderList({ orders }) {
   );
 }
 
-// --- ГОЛОВНИЙ ДОДАТОК (Керування станом) ---
 function App() {
   const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('react_cart')) || []);
   const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem('react_favorites')) || []);
@@ -180,13 +189,13 @@ function App() {
   };
 
   return (
-    <Router basename="/web-techology/lab3/build">
+    <Router>
       <header>
         <nav>
-          <Link to="/"> Меню</Link>
-          <Link to="/favorites"> Улюблені ({favorites.length})</Link>
-          <Link to="/cart"> Кошик ({cart.length})</Link>
-          <Link to="/orders"> Історія</Link>
+          <Link to="/">Меню</Link>
+          <Link to="/favorites">Улюблені ({favorites.length})</Link>
+          <Link to="/cart">Кошик ({cart.length})</Link>
+          <Link to="/orders">Історія</Link>
         </nav>
       </header>
 
