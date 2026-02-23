@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/web-techology/lab3/build/static/css/main.7a25f156.css",
-    "main.js": "/web-techology/lab3/build/static/js/main.1f629430.js",
-    "static/js/453.9de7a764.chunk.js": "/web-techology/lab3/build/static/js/453.9de7a764.chunk.js",
-    "index.html": "/web-techology/lab3/build/index.html",
-    "main.7a25f156.css.map": "/web-techology/lab3/build/static/css/main.7a25f156.css.map",
-    "main.1f629430.js.map": "/web-techology/lab3/build/static/js/main.1f629430.js.map",
-    "453.9de7a764.chunk.js.map": "/web-techology/lab3/build/static/js/453.9de7a764.chunk.js.map"
+    "main.css": "./static/css/main.7a25f156.css",
+    "main.js": "./static/js/main.b3d0df98.js",
+    "static/js/453.9c36beca.chunk.js": "./static/js/453.9c36beca.chunk.js",
+    "index.html": "./index.html",
+    "main.7a25f156.css.map": "./static/css/main.7a25f156.css.map",
+    "main.b3d0df98.js.map": "./static/js/main.b3d0df98.js.map",
+    "453.9c36beca.chunk.js.map": "./static/js/453.9c36beca.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.7a25f156.css",
-    "static/js/main.1f629430.js"
+    "static/js/main.b3d0df98.js"
   ]
 }
