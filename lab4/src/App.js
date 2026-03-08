@@ -7,7 +7,6 @@ import { auth, db } from './firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
 
-// Утиліта для безпечного парсингу ціни (навіть якщо зберегли текст замість числа)
 const getSafePrice = (price) => {
   if (!price) return 0;
   const parsed = parseFloat(String(price).replace(/[^\d.]/g, ''));
@@ -158,7 +157,7 @@ function Menu({ favorites, toggleFavorite, addToCart, menuData }) {
 // --- КОМПОНЕНТ: Улюблені (ЗАХИЩЕНО) ---
 function Favorites({ favorites, toggleFavorite, addToCart, menuData, user }) {
   if (!user) {
-    return <div className="empty-msg" style={{color: 'red', fontWeight: 'bold'}}>⚠️ Будь ласка, увійдіть в акаунт, щоб переглядати улюблені страви.</div>;
+    return <div className="empty-msg" style={{color: 'red', fontWeight: 'bold'}}> Будь ласка, увійдіть в акаунт, щоб переглядати улюблені страви.</div>;
   }
 
   const favoriteDishes = menuData.filter(dish => favorites.includes(dish.id));
@@ -194,7 +193,7 @@ function Cart({ cart, removeFromCart, clearCart, user, fetchOrders }) {
         userEmail: user.email,
         items: cart.map(i => i.title || 'Невідома страва').join(", "),
         total: total,
-        status: "Доставлено ✅",
+        status: "Доставлено ",
         date: new Date().toLocaleString()
       });
       
@@ -229,8 +228,8 @@ function Cart({ cart, removeFromCart, clearCart, user, fetchOrders }) {
 
 // --- КОМПОНЕНТ: Історія замовлень ---
 function OrderList({ orders, user }) {
-  if (!user) return <div className="empty-msg" style={{color: 'red', fontWeight: 'bold'}}>⚠️ Увійдіть в акаунт, щоб побачити історію замовлень.</div>;
-  if (orders.length === 0) return <div className="empty-msg">Ваша історія порожня 📝</div>;
+  if (!user) return <div className="empty-msg" style={{color: 'red', fontWeight: 'bold'}}> Увійдіть в акаунт, щоб побачити історію замовлень.</div>;
+  if (orders.length === 0) return <div className="empty-msg">Ваша історія порожня </div>;
 
   return (
     <div>
@@ -307,7 +306,7 @@ function App() {
   // ЗАХИСТ ДОДАВАННЯ В УЛЮБЛЕНІ
   const toggleFavorite = (id) => {
     if (!user) {
-      alert("⚠️ Будь ласка, увійдіть в акаунт, щоб додавати страви до улюблених!");
+      alert(" Будь ласка, увійдіть в акаунт, щоб додавати страви до улюблених!");
       return;
     }
     setFavorites(favorites.includes(id) ? favorites.filter(favId => favId !== id) : [...favorites, id]); 
@@ -322,10 +321,10 @@ function App() {
       <header>
         <nav style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '20px' }}>
-            <Link to="/">🍕 Меню</Link>
-            <Link to="/favorites">❤ Улюблені ({favorites.length})</Link>
-            <Link to="/cart">🛒 Кошик ({cart.length})</Link>
-            <Link to="/orders">📜 Історія</Link>
+            <Link to="/"> Меню</Link>
+            <Link to="/favorites"> Улюблені ({favorites.length})</Link>
+            <Link to="/cart"> Кошик ({cart.length})</Link>
+            <Link to="/orders"> Історія</Link>
           </div>
           
           <div className="user-info">
