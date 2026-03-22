@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 
-// --- ІМПОРТИ FIREBASE ---
 import { auth, db } from './firebase'; 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
@@ -13,7 +12,7 @@ const getSafePrice = (price) => {
   return isNaN(parsed) ? 0 : parsed;
 };
 
-// --- КОМПОНЕНТ: Авторизація ---
+// auth
 function AuthForm({ user }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -154,7 +153,6 @@ function Menu({ favorites, toggleFavorite, addToCart, menuData }) {
   );
 }
 
-// --- КОМПОНЕНТ: Улюблені (ЗАХИЩЕНО) ---
 function Favorites({ favorites, toggleFavorite, addToCart, menuData, user }) {
   if (!user) {
     return <div className="empty-msg" style={{color: 'red', fontWeight: 'bold'}}> Будь ласка, увійдіть в акаунт, щоб переглядати улюблені страви.</div>;
