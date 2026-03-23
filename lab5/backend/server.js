@@ -87,7 +87,7 @@ app.get('/api/orders/:userId', async (req, res) => {
 });
 
 // 3. Для всіх інших запитів повертаємо React-додаток (щоб працював роутинг)
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
