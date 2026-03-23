@@ -5,16 +5,20 @@ const path = require('path');
 
 const app = express();
 
-// --- 1. НАЛАШТУВАННЯ FIREBASE ---
+// --- 1. НАЛАШТУВАННЯ FIREBASE (З ФІКСОМ КЛЮЧА) ---
 let serviceAccount;
 
 try {
   if (process.env.FIREBASE_CONFIG) {
-    // Для Render: дані зі змінної оточення
     serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+    
+    // 🔥 МАГІЧНИЙ ФІКС: Відновлюємо зламані Render'ом переноси рядків у ключі
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+    }
+    
     console.log("✅ Firebase: Ініціалізовано через Environment Variable");
   } else {
-    // Для локальної розробки: з файлу
     serviceAccount = require('./serviceAccountKey.json');
     console.log("🏠 Firebase: Ініціалізовано через локальний файл");
   }
@@ -90,8 +94,6 @@ app.get('/api/orders/:userId', async (req, res) => {
 });
 
 // --- 4. ФІНАЛЬНИЙ ФІКС ДЛЯ EXPRESS 5 (УНІВЕРСАЛЬНИЙ) ---
-// Ми прибираємо текстовий шаблон взагалі. 
-// Якщо запит не підійшов під API вище — просто віддаємо index.html.
 app.use((req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
