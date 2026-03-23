@@ -5,70 +5,76 @@ const path = require('path');
 
 const app = express();
 
-// --- НАЛАШТУВАННЯ FIREBASE (Універсальне) ---
+// --- 1. НАЛАШТУВАННЯ FIREBASE (Безпечний метод) ---
 let serviceAccount;
 
 try {
   if (process.env.FIREBASE_CONFIG) {
-    // Якщо ми на Render, беремо дані зі змінної оточення
+    // Для Render: беремо дані з Environment Variable
     serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
-    console.log("Firebase ініціалізовано через Environment Variable");
+    console.log("✅ Firebase: Ініціалізовано через Environment Variable");
   } else {
-    // Якщо локально, беремо з файлу
+    // Для локальної розробки: беремо з файлу
     serviceAccount = require('./serviceAccountKey.json');
-    console.log("Firebase ініціалізовано через локальний файл");
+    console.log("🏠 Firebase: Ініціалізовано через локальний файл");
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+  }
 } catch (error) {
-  console.error("Критична помилка ініціалізації Firebase:", error);
+  console.error("❌ КРИТИЧНА ПОМИЛКА FIREBASE:", error.message);
 }
 
 const db = admin.firestore();
 
-// --- MIDDLEWARE ---
+// --- 2. MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
 
-// Хостинг статичних файлів React (папка build)
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+// Шлях до папки build фронтенду
+const buildPath = path.join(__dirname, '../frontend/build');
+app.use(express.static(buildPath));
 
-// --- МАРШРУТИ (API) ---
+// --- 3. API МАРШРУТИ ---
 
-// 1. POST: Збереження замовлення з валідацією (Варіант 12)
+// POST: Створення замовлення (Варіант 12)
 app.post('/api/orders', async (req, res) => {
   try {
     const { userId, userEmail, cartItems, total } = req.body;
 
-    // ВАЛІДАЦІЯ: Мінімум 1, максимум 10 страв
+    // СЕРВЕРНА ВАЛІДАЦІЯ (Вимога пункту 4)
     if (!cartItems || cartItems.length < 1) {
-      return res.status(400).json({ error: "Кошик порожній!" });
+      return res.status(400).json({ error: "Кошик порожній! Додайте хоча б одну страву." });
     }
+    
     if (cartItems.length > 10) {
-      return res.status(400).json({ error: "Забагато страв! Максимум 10 страв у одному замовленні." });
+      return res.status(400).json({ 
+        error: `Забагато страв! У вас ${cartItems.length}, а дозволено максимум 10.` 
+      });
     }
 
     const newOrder = {
       userId,
       userEmail,
       items: cartItems.map(item => item.title).join(', '),
-      total,
+      total: parseFloat(total),
       date: new Date().toLocaleString('uk-UA'),
       status: "Доставлено"
     };
 
     await db.collection('orders').add(newOrder);
-    res.json({ message: "Замовлення успішно оформлено та збережено через сервер!" });
+    res.status(201).json({ message: "Замовлення успішно оформлено та збережено через сервер!" });
 
   } catch (error) {
-    console.error("Помилка замовлення:", error);
-    res.status(500).json({ error: "Помилка при створенні замовлення: " + error.message });
+    console.error("Помилка при створенні замовлення:", error);
+    res.status(500).json({ error: "Помилка сервера при збереженні: " + error.message });
   }
 });
 
-// 2. GET: Отримання історії замовлень конкретного юзера
+// GET: Отримання історії замовлень (Вимога пункту 3)
 app.get('/api/orders/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -77,21 +83,30 @@ app.get('/api/orders/:userId', async (req, res) => {
       .get();
 
     const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // Сортуємо за датою (нові зверху)
+    
+    // Сортування: найсвіжіші зверху
     orders.sort((a, b) => new Date(b.date) - new Date(a.date));
     
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ error: "Помилка при отриманні історії" });
+    console.error("Помилка при читанні історії:", error);
+    res.status(500).json({ error: "Не вдалося отримати історію замовлень" });
   }
 });
 
-// 3. Для всіх інших запитів повертаємо React-додаток (щоб працював роутинг)
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+// --- 4. ОБРОБКА ШЛЯХІВ REACT (Виправлено для Express 5) ---
+// Використовуємо синтаксис :splat* або іменований параметр для сумісності з Express 5
+app.get('/:path*', (req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'), (err) => {
+    if (err) {
+      res.status(500).send("Помилка завантаження індексу фронтенду. Перевірте, чи зроблено npm run build.");
+    }
+  });
 });
 
+// --- 5. ЗАПУСК ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Сервер успішно запущено на порту ${PORT}`);
+  console.log(`🚀 Сервер працює на порту ${PORT}`);
+  console.log(`📂 Статичні файли роздаються з: ${buildPath}`);
 });
