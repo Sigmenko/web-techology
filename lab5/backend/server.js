@@ -5,16 +5,16 @@ const path = require('path');
 
 const app = express();
 
-// --- 1. НАЛАШТУВАННЯ FIREBASE (Безпечний метод) ---
+// --- 1. НАЛАШТУВАННЯ FIREBASE ---
 let serviceAccount;
 
 try {
   if (process.env.FIREBASE_CONFIG) {
-    // Для Render: беремо дані з Environment Variable
+    // Для Render: дані зі змінної оточення
     serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
     console.log("✅ Firebase: Ініціалізовано через Environment Variable");
   } else {
-    // Для локальної розробки: беремо з файлу
+    // Для локальної розробки: з файлу
     serviceAccount = require('./serviceAccountKey.json');
     console.log("🏠 Firebase: Ініціалізовано через локальний файл");
   }
@@ -25,7 +25,7 @@ try {
     });
   }
 } catch (error) {
-  console.error("❌ КРИТИЧНА ПОМИЛКА FIREBASE:", error.message);
+  console.error("❌ ПОМИЛКА FIREBASE:", error.message);
 }
 
 const db = admin.firestore();
@@ -45,14 +45,14 @@ app.post('/api/orders', async (req, res) => {
   try {
     const { userId, userEmail, cartItems, total } = req.body;
 
-    // СЕРВЕРНА ВАЛІДАЦІЯ (Вимога пункту 4)
+    // ВАЛІДАЦІЯ (Вимога пункту 4)
     if (!cartItems || cartItems.length < 1) {
-      return res.status(400).json({ error: "Кошик порожній! Додайте хоча б одну страву." });
+      return res.status(400).json({ error: "Кошик порожній!" });
     }
     
     if (cartItems.length > 10) {
       return res.status(400).json({ 
-        error: `Забагато страв! У вас ${cartItems.length}, а дозволено максимум 10.` 
+        error: `Забагато страв! Максимум 10 страв.` 
       });
     }
 
@@ -66,11 +66,10 @@ app.post('/api/orders', async (req, res) => {
     };
 
     await db.collection('orders').add(newOrder);
-    res.status(201).json({ message: "Замовлення успішно оформлено та збережено через сервер!" });
+    res.status(201).json({ message: "Замовлення успішно збережено через сервер!" });
 
   } catch (error) {
-    console.error("Помилка при створенні замовлення:", error);
-    res.status(500).json({ error: "Помилка сервера при збереженні: " + error.message });
+    res.status(500).json({ error: "Помилка сервера: " + error.message });
   }
 });
 
@@ -83,30 +82,22 @@ app.get('/api/orders/:userId', async (req, res) => {
       .get();
 
     const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // Сортування: найсвіжіші зверху
     orders.sort((a, b) => new Date(b.date) - new Date(a.date));
     
     res.json(orders);
   } catch (error) {
-    console.error("Помилка при читанні історії:", error);
-    res.status(500).json({ error: "Не вдалося отримати історію замовлень" });
+    res.status(500).json({ error: "Помилка при читанні історії" });
   }
 });
 
-// --- 4. ОБРОБКА ШЛЯХІВ REACT (Виправлено для Express 5) ---
-// Використовуємо синтаксис :splat* або іменований параметр для сумісності з Express 5
-app.get('/:path*', (req, res) => {
-  res.sendFile(path.join(buildPath, 'index.html'), (err) => {
-    if (err) {
-      res.status(500).send("Помилка завантаження індексу фронтенду. Перевірте, чи зроблено npm run build.");
-    }
-  });
+// --- 4. ФІНАЛЬНИЙ ФІКС ДЛЯ EXPRESS 5 ---
+// Цей блок має бути ОСТАННІМ. Він віддає React для всіх інших запитів.
+app.use((req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 // --- 5. ЗАПУСК ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Сервер працює на порту ${PORT}`);
-  console.log(`📂 Статичні файли роздаються з: ${buildPath}`);
+  console.log(`🚀 Сервер запущено на порту ${PORT}`);
 });
