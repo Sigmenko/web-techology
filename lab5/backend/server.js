@@ -34,8 +34,10 @@ const db = admin.firestore();
 app.use(cors());
 app.use(express.json());
 
-// Шлях до папки build фронтенду
-const buildPath = path.join(__dirname, '../frontend/build');
+// Визначаємо шлях до папки build
+const buildPath = path.resolve(__dirname, '../frontend/build');
+
+// Роздаємо статичні файли (CSS, JS, картинки)
 app.use(express.static(buildPath));
 
 // --- 3. API МАРШРУТИ ---
@@ -45,15 +47,12 @@ app.post('/api/orders', async (req, res) => {
   try {
     const { userId, userEmail, cartItems, total } = req.body;
 
-    // ВАЛІДАЦІЯ (Вимога пункту 4)
     if (!cartItems || cartItems.length < 1) {
       return res.status(400).json({ error: "Кошик порожній!" });
     }
     
     if (cartItems.length > 10) {
-      return res.status(400).json({ 
-        error: `Забагато страв! Максимум 10 страв.` 
-      });
+      return res.status(400).json({ error: "Забагато страв! Максимум 10." });
     }
 
     const newOrder = {
@@ -66,14 +65,14 @@ app.post('/api/orders', async (req, res) => {
     };
 
     await db.collection('orders').add(newOrder);
-    res.status(201).json({ message: "Замовлення успішно збережено через сервер!" });
+    res.status(201).json({ message: "Замовлення успішно збережено!" });
 
   } catch (error) {
     res.status(500).json({ error: "Помилка сервера: " + error.message });
   }
 });
 
-// GET: Отримання історії замовлень (Вимога пункту 3)
+// GET: Отримання історії замовлень
 app.get('/api/orders/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -90,8 +89,9 @@ app.get('/api/orders/:userId', async (req, res) => {
   }
 });
 
-// --- 4. ФІНАЛЬНИЙ ФІКС ДЛЯ EXPRESS 5 ---
-// Цей блок має бути ОСТАННІМ. Він віддає React для всіх інших запитів.
+// --- 4. ФІНАЛЬНИЙ ФІКС ДЛЯ EXPRESS 5 (УНІВЕРСАЛЬНИЙ) ---
+// Ми прибираємо текстовий шаблон взагалі. 
+// Якщо запит не підійшов під API вище — просто віддаємо index.html.
 app.use((req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
@@ -99,5 +99,5 @@ app.use((req, res) => {
 // --- 5. ЗАПУСК ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Сервер запущено на порту ${PORT}`);
+  console.log(`🚀 Сервер працює на порту ${PORT}`);
 });
