@@ -5,19 +5,38 @@ const path = require('path');
 
 const app = express();
 
-// --- 1. НАЛАШТУВАННЯ FIREBASE (Base64 метод) ---
+// --- 1. НАЛАШТУВАННЯ FIREBASE (Універсальний пошук ключа) ---
 let serviceAccount;
 
 try {
-  if (process.env.FIREBASE_BASE64) {
-    // Розшифровуємо рядок Base64 назад у JSON
-    const buff = Buffer.from(process.env.FIREBASE_BASE64, 'base64');
-    const text = buff.toString('utf-8');
-    serviceAccount = JSON.parse(text);
-    console.log("✅ Firebase: Ініціалізовано через Base64");
+  // Шляхи, де може лежати файл на Render та локально
+  const paths = [
+    '/etc/secrets/serviceAccountKey.json', // Стандарт для Render Secret Files
+    path.join(__dirname, '../../../serviceAccountKey.json'), // Корінь репозиторію
+    path.join(__dirname, 'serviceAccountKey.json') // Локальна папка backend
+  ];
+
+  if (process.env.FIREBASE_CONFIG) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+    }
+    console.log("✅ Firebase: Ініціалізовано через FIREBASE_CONFIG");
   } else {
-    serviceAccount = require('./serviceAccountKey.json');
-    console.log("🏠 Firebase: Ініціалізовано через файл");
+    // Шукаємо файл по черзі
+    for (const p of paths) {
+      try {
+        serviceAccount = require(p);
+        console.log(`🏠 Firebase: Знайдено файл за шляхом: ${p}`);
+        break; 
+      } catch (e) {
+        continue;
+      }
+    }
+  }
+
+  if (!serviceAccount) {
+    throw new Error("Не знайдено жодного джерела для ініціалізації Firebase (ні змінної, ні файлу)");
   }
 
   if (!admin.apps.length) {
@@ -42,13 +61,8 @@ app.use(express.static(buildPath));
 app.post('/api/orders', async (req, res) => {
   try {
     const { userId, userEmail, cartItems, total } = req.body;
-
-    if (!cartItems || cartItems.length < 1) {
-      return res.status(400).json({ error: "Кошик порожній!" });
-    }
-    if (cartItems.length > 10) {
-      return res.status(400).json({ error: "Забагато страв! Максимум 10." });
-    }
+    if (!cartItems || cartItems.length < 1) return res.status(400).json({ error: "Кошик порожній!" });
+    if (cartItems.length > 10) return res.status(400).json({ error: "Максимум 10 страв!" });
 
     const newOrder = {
       userId,
@@ -61,7 +75,6 @@ app.post('/api/orders', async (req, res) => {
 
     await db.collection('orders').add(newOrder);
     res.status(201).json({ message: "Замовлення успішно збережено!" });
-
   } catch (error) {
     res.status(500).json({ error: "Помилка сервера: " + error.message });
   }
@@ -70,16 +83,12 @@ app.post('/api/orders', async (req, res) => {
 app.get('/api/orders/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
-    const snapshot = await db.collection('orders')
-      .where('userId', '==', userId)
-      .get();
-
+    const snapshot = await db.collection('orders').where('userId', '==', userId).get();
     const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     orders.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ error: "Помилка при читанні історії" });
+    res.status(500).json({ error: "Помилка історії" });
   }
 });
 
@@ -90,6 +99,4 @@ app.use((req, res) => {
 
 // --- 5. ЗАПУСК ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Сервер працює на порту ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Сервер працює на порту ${PORT}`));
