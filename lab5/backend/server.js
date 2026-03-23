@@ -5,22 +5,19 @@ const path = require('path');
 
 const app = express();
 
-// --- 1. НАЛАШТУВАННЯ FIREBASE (З ФІКСОМ КЛЮЧА) ---
+// --- 1. НАЛАШТУВАННЯ FIREBASE (Base64 метод) ---
 let serviceAccount;
 
 try {
-  if (process.env.FIREBASE_CONFIG) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
-    
-    // 🔥 МАГІЧНИЙ ФІКС: Відновлюємо зламані Render'ом переноси рядків у ключі
-    if (serviceAccount.private_key) {
-      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-    }
-    
-    console.log("✅ Firebase: Ініціалізовано через Environment Variable");
+  if (process.env.FIREBASE_BASE64) {
+    // Розшифровуємо рядок Base64 назад у JSON
+    const buff = Buffer.from(process.env.FIREBASE_BASE64, 'base64');
+    const text = buff.toString('utf-8');
+    serviceAccount = JSON.parse(text);
+    console.log("✅ Firebase: Ініціалізовано через Base64");
   } else {
     serviceAccount = require('./serviceAccountKey.json');
-    console.log("🏠 Firebase: Ініціалізовано через локальний файл");
+    console.log("🏠 Firebase: Ініціалізовано через файл");
   }
 
   if (!admin.apps.length) {
@@ -38,15 +35,10 @@ const db = admin.firestore();
 app.use(cors());
 app.use(express.json());
 
-// Визначаємо шлях до папки build
 const buildPath = path.resolve(__dirname, '../frontend/build');
-
-// Роздаємо статичні файли (CSS, JS, картинки)
 app.use(express.static(buildPath));
 
 // --- 3. API МАРШРУТИ ---
-
-// POST: Створення замовлення (Варіант 12)
 app.post('/api/orders', async (req, res) => {
   try {
     const { userId, userEmail, cartItems, total } = req.body;
@@ -54,7 +46,6 @@ app.post('/api/orders', async (req, res) => {
     if (!cartItems || cartItems.length < 1) {
       return res.status(400).json({ error: "Кошик порожній!" });
     }
-    
     if (cartItems.length > 10) {
       return res.status(400).json({ error: "Забагато страв! Максимум 10." });
     }
@@ -76,7 +67,6 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// GET: Отримання історії замовлень
 app.get('/api/orders/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -93,7 +83,7 @@ app.get('/api/orders/:userId', async (req, res) => {
   }
 });
 
-// --- 4. ФІНАЛЬНИЙ ФІКС ДЛЯ EXPRESS 5 (УНІВЕРСАЛЬНИЙ) ---
+// --- 4. РОЗДАЧА REACT ---
 app.use((req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
